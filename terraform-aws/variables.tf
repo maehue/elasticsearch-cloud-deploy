@@ -12,6 +12,12 @@ variable "vpc_id" {
   type = "string"
 }
 
+variable "clients_subnet_ids" {
+  description = "Subnets to run client nodes and client ELB in. Only one subnet per availability zone allowed. Will detect a single subnet by default." 
+  type = "list"
+  default = []
+}
+
 variable "availability_zones" {
   type = "list"
   description = "AWS region to launch servers; if not set the available zones will be detected automatically"
@@ -123,4 +129,14 @@ variable "lb_port" {
 variable "health_check_type" {
   description = "Controls how health checking is done. Must be one of EC2 or ELB."
   default     = "EC2"
+}
+
+variable "xpack_monitoring_host" {
+  description = "ES host to send monitoring data"
+  default     = "self"
+}
+
+variable "s3_backup_bucket" {
+  description = "S3 bucket for backups"
+  default     = ""
 }

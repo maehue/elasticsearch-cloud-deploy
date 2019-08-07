@@ -10,14 +10,17 @@ data "template_file" "client_userdata_script" {
     es_environment          = "${var.environment}-${var.es_cluster}"
     security_groups         = "${aws_security_group.elasticsearch_security_group.id}"
     availability_zones      = "${join(",", coalescelist(var.availability_zones, data.aws_availability_zones.available.names))}"
-    minimum_master_nodes    = "${format("%d", var.masters_count / 2 + 1)}"
     master                  = "false"
     data                    = "false"
-    http_enabled            = "true"
+    bootstrap_node          = "false"
+    aws_region              = "${var.aws_region}"
     security_enabled        = "${var.security_enabled}"
     monitoring_enabled      = "${var.monitoring_enabled}"
+    masters_count           = "${var.masters_count}"
     client_user             = "${var.client_user}"
     client_pwd              = "${random_string.vm-login-password.result}"
+    xpack_monitoring_host   = "${var.xpack_monitoring_host}"
+    asg_name                = ""
   }
 }
 
@@ -54,7 +57,7 @@ resource "aws_autoscaling_group" "client_nodes" {
 
   load_balancers = ["${aws_elb.es_client_lb.id}"]
 
-  vpc_zone_identifier = ["${data.aws_subnet_ids.selected.ids}"]
+  vpc_zone_identifier   = ["${coalescelist(var.clients_subnet_ids, list(data.aws_subnet_ids.selected.ids[0]))}"]
 
   tag {
     key                 = "Name"
